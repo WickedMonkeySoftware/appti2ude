@@ -1,0 +1,11 @@
+{
+    "name": "appti2ude/appti2ude",
+    "description": "Stuff",
+    "authors": [
+        {
+            "name": "Rob Landers",
+            "email": "landers.robert@gmail.com"
+        }
+    ],
+    "require": {}
+}
