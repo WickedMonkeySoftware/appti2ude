@@ -7,6 +7,8 @@
  */
 
 namespace appti2ude;
+use appti2ude\bones\MagicClass;
+use appti2ude\inter\IEvent;
 
 /**
  * Class Event
@@ -15,19 +17,8 @@ namespace appti2ude;
  * Handles event encapsulation
  *
  */
-class Event {
-
-	/**
-	 * @var array The serialized data
-	 */
-	private $message = [];
-
-	/**
-	 * @param $id string id of the aggregate
-	 * @param $data array serialized data to regenerate the event
-	 */
-	public function __constructor($id, $data) {
-		$this->message = $data;
-		$this->message['id'] = $id;
+class Event extends MagicClass implements IEvent {
+	protected function EventInitialize() {
+		$this->AddProperty('payload', []);
 	}
 }
