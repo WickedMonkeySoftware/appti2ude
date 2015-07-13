@@ -1,17 +1,17 @@
 <?php
 
-require_once 'lib/interfaces/ICommand.php';
-require_once 'lib/interfaces/IDispatch.php';
-require_once 'lib/interfaces/IEventStore.php';
-require_once 'lib/interfaces/IEvent.php';
-require_once 'lib/interfaces/ISnapshot.php';
-require_once 'lib/MagicClass.php';
-require_once 'lib/Aggregate.php';
-require_once 'lib/Event.php';
-require_once 'lib/Command.php';
-require_once 'lib/Snapshot.php';
-require_once 'lib/MemoryEventStore.php';
-require_once 'lib/MemoryDispatcher.php';
+require_once 'src/inter/ICommand.php';
+require_once 'src/inter/IDispatch.php';
+require_once 'src/inter/IEventStore.php';
+require_once 'src/inter/IEvent.php';
+require_once 'src/inter/ISnapshot.php';
+require_once 'src/MagicClass.php';
+require_once 'src/Aggregate.php';
+require_once 'src/Event.php';
+require_once 'src/Command.php';
+require_once 'src/Snapshot.php';
+require_once 'src/MemoryEventStore.php';
+require_once 'src/MemoryDispatcher.php';
 
 $store = new \appti2ude\MemoryEventStore();
 $dispatch = new \appti2ude\MemoryDispatcher($store);
