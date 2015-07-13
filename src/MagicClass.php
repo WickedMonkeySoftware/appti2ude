@@ -49,7 +49,8 @@ class MagicClass {
 		$name = get_class($this);
 
 		if (!$unique) {
-			$name = end(explode('\\', $name));
+			$spread = explode('\\', $name);
+			$name = end($spread);
 		}
 
 		return $name;
@@ -82,7 +83,7 @@ class MagicClass {
 
 	private function Initialize($class) {
 		if (is_subclass_of($class, __CLASS__)) {
-			$class = end(explode('\\', $class));
+			$class = $this->Name();
 			$initializer = $class . "Initialize";
 			$this->Initialize(get_parent_class($class));
 			if (method_exists($this, $initializer))
