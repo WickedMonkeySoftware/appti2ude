@@ -28,13 +28,16 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 			$func = $callback[1];
 
 			$data = $this->eventStore->LoadEventsFor($command->id);
-			$t = new $type($command->id, $data);
+			$t = new $type($this, $command->id, $data);
 			foreach ($t->$func($command) as $event) {
 				$this->PublishEvent($event);
 			}
+			unset($t);
+
+			return;
 		}
 
-		throw new \Exception('No command handler registered');
+		throw new \Exception("No command handler registered: $command->type");
 	}
 
 	function PublishEvent(IEvent $event) {
@@ -46,42 +49,47 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 				$func = $callback[1];
 
 				$data = $this->eventStore->LoadEventsFor($event->id);
-				$aggregate = new $type($event->id, $data);
+				$aggregate = new $type($this, $event->id);
+				$aggregate->ApplyEvents($data);
 				$aggregate->$func($event);
+				$data[] = $event;
 
-				$this->eventStore->SaveEventsFor($aggregate->id, $aggregate);
+				$this->eventStore->SaveEventsFor($aggregate->id, $data);
+				unset($aggregate);
 			}
 		}
 	}
 
-	function AddHandlerFor($command, array $callback) {
-		$type = get_class($callback[0]);
-		if (isset($this->commandHandlers[$command])) {
-			throw new \Exception('Command handler already defined');
+	function AddHandlerFor($command, $callback) {
+		foreach ($callback as $call => $instance) {
+			$type = get_class($instance);
+			$handlers = &$this->commandHandlers;
+			$handlers[$command] = [
+				$type,
+				$call
+			];
 		}
-
-		$this->commandHandlers[$command] = [
-			$type,
-			$callback[1]
-		];
 	}
 
-	function AddSubscriberFor($event, array $callback) {
-		$type = get_class($callback[0]);
-		$this->eventSubscribers[$event][] = [
-			$type,
-			$callback[1]
-		];
+	function AddSubscriberFor($event, $callback) {
+		foreach ($callback as $call => $instance) {
+			$type = get_class($instance);
+			$subs = &$this->eventSubscribers;
+			$subs[$event][] = [
+				$type,
+				$call
+			];
+		}
 	}
 
 	function Scan($instance) {
 		$snap = Snapshot::TakeSnapshot($instance);
 		$data = $snap->GetSnapshot();
 		foreach ($data['iApply'] as $event => $func) {
-			$this->AddSubscriberFor($event, [$instance => $func]);
+			$this->AddSubscriberFor($event, [$func => $instance]);
 		}
 		foreach ($data['iHandle'] as $command => $func) {
-			$this->AddHandlerFor($command, [$instance => $func]);
+			$this->AddHandlerFor($command, [$func => $instance]);
 		}
 	}
 }

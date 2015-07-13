@@ -2,6 +2,7 @@
 
 namespace appti2ude;
 
+use appti2ude\inter\IEventStore;
 use appti2ude\inter\ISnapshot;
 
 class Snapshot implements ISnapshot {
@@ -11,9 +12,10 @@ class Snapshot implements ISnapshot {
 		$this->snapshot = $snap;
 	}
 
-	public static function Serialize(Aggregate $aggregate) : Aggregate {
+	public static function Serialize(Aggregate $aggregate) : ISnapshot {
 		$state = $aggregate->Snapshot();
 		$snap = [];
+		$snap['events'] = [];
 		foreach ($state['events'] as $event) {
 			$snap['events'][] = $event->Snapshot();
 		}
@@ -21,7 +23,13 @@ class Snapshot implements ISnapshot {
 		return new Snapshot($snap);
 	}
 
-	public static function Create(array $data = [], array $events = []) {
+	public static function CreateFromStore(IEventStore $store, $id) : ISnapshot {
+		$snapshot = [];
+		$snapshot['events'] = $store->LoadEventsFor($id);
+		return new Snapshot($snapshot);
+	}
+
+	public static function Create(array $data = [], array $events = []) : ISnapshot {
 		$snapshot = [];
 		foreach ($events as $event) {
 			$snapshot['events'][] = $event->Snapshot();
@@ -31,7 +39,7 @@ class Snapshot implements ISnapshot {
 		return new Snapshot($snapshot);
 	}
 
-	public static function TakeSnapshot(Aggregate $aggregate) : Snapshot {
+	public static function TakeSnapshot(Aggregate $aggregate) : ISnapshot {
 		$state = $aggregate->Snapshot();
 		$state['lastSnapshot'] = $state;
 		$state = [
@@ -41,11 +49,11 @@ class Snapshot implements ISnapshot {
 		return new Snapshot($state);
 	}
 
-	public function GetSnapshot() {
+	public function GetSnapshot() : array {
 		return $this->snapshot['state'];
 	}
 
-	public function GetEvents() {
+	public function GetEvents() : array {
 		return $this->snapshot['events'];
 	}
 }

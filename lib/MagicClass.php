@@ -1,6 +1,7 @@
 <?php
 
 namespace appti2ude\bones;
+use appti2ude\inter\ISnapshot;
 
 /**
  * Class MagicClass
@@ -74,7 +75,7 @@ class MagicClass {
 		$this->data['type'] = get_class($this);
 		$this->data['id'] = $id;
 		$this->Initialize($this->data['type']);
-		$this->data = array_merge($data, $this->data);
+		$this->data = array_merge($this->data, $data);
 		$this->data['type'] = get_class($this);
 		$this->data['id'] = $id;
 	}
@@ -84,7 +85,6 @@ class MagicClass {
 			$class = end(explode('\\', $class));
 			$initializer = $class . "Initialize";
 			$this->Initialize(get_parent_class($class));
-			$this->Debug("Initializing $initializer");
 			if (method_exists($this, $initializer))
 				$this->$initializer();
 		}
@@ -99,7 +99,8 @@ class MagicClass {
 			];
 		}
 		$this->properties[$isPrivate ? 'private' : 'public'][$name] = $access;
-		$this->data[$name] = $default;
+		//$this->data[$name] = $default;
+		$this->$name = $default;
 	}
 
 	/**
@@ -153,11 +154,8 @@ class MagicClass {
 		return false;
 	}
 
-	function __get($var) {
+	function &__get($var) {
 		$caller = $this->GetCallingClass();
-
-		$this->Debug("get ".$var);
-		$this->Debug($this->data);
 
 		if ($var == 'type' || $var == 'id') {
 			return $this->data[$var];
@@ -166,14 +164,10 @@ class MagicClass {
 		if ($this->FindProperty($var, $this->IsSameClass($caller), true)) {
 			return $this->data[$var];
 		}
-
-		return null;
 	}
 
 	function __set($var, $value) {
 		$caller = $this->GetCallingClass();
-
-		$this->Debug("set ".$var);
 
 		if ($this->FindProperty($var, $this->IsSameClass($caller), false)) {
 			$this->data[$var] = $value;

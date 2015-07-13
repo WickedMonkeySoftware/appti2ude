@@ -1,6 +1,10 @@
 <?php
 
 namespace appti2ude;
+use appti2ude\inter\IDispatch;
+use appti2ude\inter\IEvent;
+use appti2ude\inter\IEventStore;
+use appti2ude\inter\ISnapshot;
 
 /**
  * Class Aggregate
@@ -12,12 +16,23 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 	protected function AggregateInitialize() {
 		$this->AddProperty('eventsLoaded', 0);
 		$this->AddProperty('iApply', []);
-		$this->Debug($this->data);
+		$this->AddProperty('iHandle', []);
+		$this->AddProperty('dispatch', null);
+	}
+
+	function __construct(IDispatch $dispatcher = null, $id = null, $data = []) {
+		parent::__construct($id, $data);
+		$this->dispatch = $dispatcher;
 	}
 
 	protected function addEventHandler($eventName, $funcName) {
-		$this->iApply[$eventName] = $funcName;
-		$this->Debug($this->iApply);
+		$applier = &$this->iApply;
+		$applier[$eventName] = $funcName;
+	}
+
+	protected function addCommandHandler($command, $funcName) {
+		$applier = &$this->iHandle;
+		$applier[$command] = $funcName;
 	}
 
 	function test() {
@@ -35,9 +50,7 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		}
 	}
 
-	public function ApplyOneEvent(Event $event) {
-		echo "umm";
-		$this->Debug($this->iApply);
+	public function ApplyOneEvent(IEvent $event) {
 		if (isset($this->iApply[$event->type])) {
 			$apply = $this->iApply[$event->type];
 			$this->$apply($event);
@@ -46,6 +59,10 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		}
 
 		throw new \Exception('aggregate doesn\'t apply this event: ' . $event->type);
+	}
+
+	public function HydrateFromSnapshot(ISnapshot $snapshot) {
+		$this->ApplyEvents($snapshot->GetEvents()); //todo: use snapshot
 	}
 }
 

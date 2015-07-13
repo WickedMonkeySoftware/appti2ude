@@ -12,9 +12,9 @@ use appti2ude\Aggregate;
 use appti2ude\Snapshot;
 
 interface ISnapshot {
-	static function Create(array $data, array $events) : Snapshot;
-	static function Serialize(Aggregate $aggregate) : Snapshot;
-	static function TakeSnapshot(Aggregate $aggregate) : Snapshot;
+	static function Create(array $data, array $events) : ISnapshot;
+	static function Serialize(Aggregate $aggregate) : ISnapshot;
+	static function TakeSnapshot(Aggregate $aggregate) : ISnapshot;
 	function GetSnapshot() : array;
 	function GetEvents() : array;
 }

@@ -2,6 +2,7 @@
 namespace appti2ude;
 
 use appti2ude\bones\MagicClass;
+use appti2ude\inter\IEvent;
 use appti2ude\inter\IEventStore;
 
 class MemoryEventStore extends MagicClass implements IEventStore {
@@ -13,16 +14,16 @@ class MemoryEventStore extends MagicClass implements IEventStore {
 		parent::__construct();
 	}
 
-	public function LoadEventsFor($id, $aggregate) : array {
-		return $this->store[$aggregate][$id] ?? [];
+	public function LoadEventsFor($id) : array {
+		return $this->store[$id] ?? [];
 	}
 
-	public function SaveEventsFor($id, Aggregate $aggregate) {
-		$save = Snapshot::Serialize($aggregate);
+	public function SaveEventsFor($id, array $events) {
+		$store = &$this->store;
 
 		//todo: a rather nieve implementation -- should do proper versioning, and doesn't support snapshots
-		if (count($this->store[$aggregate->Name()][$aggregate->id]) != count($save['events'])) {
-			$store[$aggregate->Name()][$aggregate->id] = clone $save['events'];
+		if (count($store[$id]) != count($events)) {
+			$store[$id] = $events;
 		}
 	}
 }
