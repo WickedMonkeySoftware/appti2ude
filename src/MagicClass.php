@@ -72,7 +72,7 @@ class MagicClass {
 	}
 
 	function __construct($id = null, array $data = []) {
-		$this->data = [];
+		//$this->data = [];
 		$this->data['type'] = get_class($this);
 		$this->data['id'] = $id;
 		$this->Initialize($this->data['type']);
@@ -83,9 +83,11 @@ class MagicClass {
 
 	private function Initialize($class) {
 		if (is_subclass_of($class, __CLASS__)) {
-			$class = $this->Name();
-			$initializer = $class . "Initialize";
+			$spread = explode('\\', $class);
+			$classInit = end($spread);
+			$initializer = $classInit . "Initialize";
 			$this->Initialize(get_parent_class($class));
+			echo "$initializer\n";
 			if (method_exists($this, $initializer))
 				$this->$initializer();
 		}
@@ -159,12 +161,14 @@ class MagicClass {
 		$caller = $this->GetCallingClass();
 
 		if ($var == 'type' || $var == 'id') {
-			return $this->data[$var];
+			$return = &$this->data[$var];
 		}
 
 		if ($this->FindProperty($var, $this->IsSameClass($caller), true)) {
-			return $this->data[$var];
+			$return = &$this->data[$var];
 		}
+
+		return $return;
 	}
 
 	function __set($var, $value) {

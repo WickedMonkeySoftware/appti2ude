@@ -23,7 +23,7 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 	function SendCommand(ICommand $command) {
 		if (isset($this->commandHandlers[$command->type])) {
 			$handlers = $this->commandHandlers[$command->type];
-			$callback = $handlers;
+			$callback = &$handlers;
 			$type = $callback[0];
 			$func = $callback[1];
 

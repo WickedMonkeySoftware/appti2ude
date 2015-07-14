@@ -10,7 +10,7 @@ namespace appti2ude;
 
 use appti2ude\bones\MagicClass;
 
-require_once '../src/MagicClass.php';
+require_once './src/MagicClass.php';
 
 class Inherit extends MagicClass {
 	protected function InheritInitialize() {

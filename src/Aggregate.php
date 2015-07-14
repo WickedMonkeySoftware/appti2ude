@@ -25,7 +25,7 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$this->dispatch = $dispatcher;
 	}
 
-	protected function addEventHandler($eventName, $funcName) {
+	protected function AddEventHandler($eventName, $funcName) {
 		$applier = &$this->iApply;
 		$applier[$eventName] = $funcName;
 	}
