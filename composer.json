@@ -14,8 +14,8 @@
     "minimum-stability": "dev",
     "require": {},
     "autoload": {
-        "psr-0": {
-            "appti2ude": "src/"
+        "psr-4": {
+            "appti2ude\\": "src/"
         }
     }
 }
