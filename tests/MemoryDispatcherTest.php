@@ -52,7 +52,7 @@ class Abicus extends \appti2ude\Aggregate {
 	function Add($command) {
 		for($i = 0; $i < $command->amount; $i++) {
 			$event = new AddEvent($this->id);
-			//yield $event;
+			yield $event;
 		}
 	}
 
@@ -84,10 +84,10 @@ class MemoryDispatcherTest extends \PHPUnit_Framework_TestCase {
 
 		$dispatch->SendCommand($add1);
 
-		//$ab = new Abicus(null, '123');
-		//$snapshot = \appti2ude\Snapshot::CreateFromStore($store, '123');
-		//$ab->HydrateFromSnapshot($snapshot);
+		$ab = new Abicus(null, '123');
+		$snapshot = \appti2ude\Snapshot::CreateFromStore($store, '123');
+		$ab->HydrateFromSnapshot($snapshot);
 
-		//$this->assertEquals(1, $ab->amount);
+		$this->assertEquals(1, $ab->amount);
 	}
 }
