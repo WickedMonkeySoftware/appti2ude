@@ -45,8 +45,8 @@ class Abicus extends \appti2ude\Aggregate {
 		$this->AddProperty('count', 0);
 		$this->AddEventHandler('AddEvent', 'AddOne');
 		$this->AddEventHandler('SubEvent', 'SubOne');
-		$this->addCommandHandler('AddCommand', 'Add');
-		$this->addCommandHandler('SubtractCommand', 'Subtract');
+		$this->addCommandHandler('appti2ude\AddCommand', 'Add');
+		$this->addCommandHandler('appti2ude\SubtractCommand', 'Subtract');
 	}
 
 	function Add($command) {
