@@ -110,6 +110,7 @@ $workflow->Scan($forscan);
 class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
     function testSimple() {
         global $dispatch;
+        $dispatch->SendCommand(new PressButton('1', ['button' => 'clr']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
@@ -124,6 +125,7 @@ class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
 
     function testOutOfOrder() {
         global $dispatch;
+        $dispatch->SendCommand(new PressButton('1', ['button' => 'clr']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
         $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
