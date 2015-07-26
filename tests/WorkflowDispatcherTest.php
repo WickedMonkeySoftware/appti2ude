@@ -137,6 +137,6 @@ class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
         $snapshot = \appti2ude\Snapshot::CreateFromStore($dispatch, '1');
         $result->HydrateFromSnapshot($snapshot);
 
-        $this->assertEquals('5 + 5 + 55 = 65', $result->display);
+        $this->assertEquals('5 + 5 + 5 = 15', $result->display);
     }
 }
