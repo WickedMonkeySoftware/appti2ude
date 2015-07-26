@@ -81,13 +81,13 @@ class MemoryDispatcherTest extends \PHPUnit_Framework_TestCase {
 		$dispatch = new \appti2ude\MemoryDispatcher($store, null);
 		$abicus = new Abicus($dispatch, '123');
 		$dispatch->Scan($abicus);
-
 		$dispatch->SendCommand($add1);
 
+		// verify
 		$ab = new Abicus(null, '123');
 		$snapshot = \appti2ude\Snapshot::CreateFromStore($store, '123');
 		$ab->HydrateFromSnapshot($snapshot);
 
-		$this->assertEquals(1, $ab->amount);
+		$this->assertEquals(1, $ab->count);
 	}
 }
