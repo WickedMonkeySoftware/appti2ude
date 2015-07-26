@@ -4,6 +4,9 @@ class test {
 	var $var;
 
 	function yielder($inc) {
+		for ($i = 0; $i < $inc; $i++) {
+			yield $i;
+		}
 	}
 
 	static function looper() {
