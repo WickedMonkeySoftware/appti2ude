@@ -30,7 +30,7 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$applier[$eventName] = $funcName;
 	}
 
-	protected function addCommandHandler($command, $funcName) {
+	protected function AddCommandHandler($command, $funcName) {
 		$applier = &$this->iHandle;
 		$applier[$command] = $funcName;
 	}
