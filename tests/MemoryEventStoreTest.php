@@ -4,7 +4,7 @@ class test {
 	var $var;
 
 	function yielder($inc) {
-		for ($i = 0; $i < $inc; $i++) {
+		for ($i = 0; $i < 3; $i++) {
 			yield $i;
 		}
 	}
