@@ -12,6 +12,7 @@ require_once 'src/Command.php';
 require_once 'src/Snapshot.php';
 require_once 'src/MemoryEventStore.php';
 require_once 'src/MemoryDispatcher.php';
+require_once 'src/WorkflowDispatcher.php';
 
 $store = new \appti2ude\MemoryEventStore();
 $dispatch = new appti2ude\MemoryDispatcher($store);
