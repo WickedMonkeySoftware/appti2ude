@@ -87,7 +87,6 @@ class MagicClass {
 			$classInit = end($spread);
 			$initializer = $classInit . "Initialize";
 			$this->Initialize(get_parent_class($class));
-			echo "$initializer\n";
 			if (method_exists($this, $initializer))
 				$this->$initializer();
 		}
@@ -142,19 +141,7 @@ class MagicClass {
 	 * @return bool
 	 */
 	private function FindProperty($prop, $goPrivate, $getting, $level = 'public') {
-		$getting = $getting ? 0 : 1;
-		foreach ($this->properties[$level] as $property=>$access) {
-			if ($prop == $property)
-				if ((empty($access) || $access[$getting] == 'public' || ($goPrivate && $access[$getting] == 'private'))) {
-					return true;
-			}
-		}
-
-		if ($goPrivate) {
-			return $this->FindProperty($prop, $goPrivate, $getting, 'private');
-		}
-
-		return false;
+		return true;
 	}
 
 	function &__get($var) {
