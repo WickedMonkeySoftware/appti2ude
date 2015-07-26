@@ -29,6 +29,7 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 
 			$data = $this->eventStore->LoadEventsFor($command->id);
 			$t = new $type($this, $command->id, $data);
+
 			foreach ($t->$func($command) as $event) {
 				$this->PublishEvent($event);
 			}

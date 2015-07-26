@@ -63,15 +63,15 @@ class Abicus extends \appti2ude\Aggregate {
 	}
 }
 
-$ab = new Abicus(null, '123');
-$add = new AddEvent('123');
-$sub = new SubEvent('123');
+//$ab = new Abicus(null, '123');
+//$add = new AddEvent('123');
+//$sub = new SubEvent('123');
 
-$ab->ApplyOneEvent($add);
+//$ab->ApplyOneEvent($add);
 
 //echo "Added one, got: $ab->count";
 
-$ab->ApplyOneEvent($sub);
+//$ab->ApplyOneEvent($sub);
 
 //echo "Sub one, got: $ab->count";
 
@@ -94,7 +94,7 @@ $snapshot = \appti2ude\Snapshot::CreateFromStore($store, '123');
 $ab->HydrateFromSnapshot($snapshot);
 
 header('content-type: application/json');
-echo json_encode($dispatch->Snapshot());
+echo json_encode($ab->Snapshot());
 
 //echo "Got: $ab->count";
 
