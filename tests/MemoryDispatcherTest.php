@@ -43,10 +43,10 @@ class SubtractCommand extends AddCommand {
 class Abicus extends \appti2ude\Aggregate {
 	protected function AbicusInitialize() {
 		$this->AddProperty('count', 0);
-		$this->AddEventHandler('appti2ude\AddEvent', 'AddOne');
-		$this->AddEventHandler('appti2ude\SubEvent', 'SubOne');
-		$this->addCommandHandler('appti2ude\AddCommand', 'Add');
-		$this->addCommandHandler('appti2ude\SubtractCommand', 'Subtract');
+		$this->AddEventHandler('AddEvent', 'AddOne');
+		$this->AddEventHandler('SubEvent', 'SubOne');
+		$this->addCommandHandler('AddCommand', 'Add');
+		$this->addCommandHandler('SubtractCommand', 'Subtract');
 	}
 
 	function Add($command) {
