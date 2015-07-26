@@ -1,4 +1,4 @@
-<?
+<?php
 
 require_once 'src/inter/ICommand.php';
 require_once 'src/inter/IDispatch.php';
