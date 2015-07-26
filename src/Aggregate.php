@@ -50,15 +50,28 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		}
 	}
 
-	public function ApplyOneEvent(IEvent $event) {
-		if (isset($this->iApply[$event->type])) {
-			$apply = $this->iApply[$event->type];
+	private function doApply($event, $type) {
+		if (isset($this->iApply[$type])) {
+			$apply = $this->iApply[$type];
 			$this->$apply($event);
 			$this->eventsLoaded = $this->eventsLoaded + 1;
-			return;
+			return true;
 		}
 
-		throw new \Exception('aggregate doesn\'t apply this event: ' . $event->type);
+		return false;
+	}
+
+	public function ApplyOneEvent(IEvent $event) {
+		$type = $event->type;
+		$applied = $this->doApply($event, $type);
+
+		if (!$applied) {
+			$type = end(explode('\\', $type));
+			$applied = $this->doApply($event, $type);
+		}
+
+		if (!$applied)
+			throw new \Exception('aggregate doesn\'t apply this event: ' . $event->type);
 	}
 
 	public function HydrateFromSnapshot(ISnapshot $snapshot) {
