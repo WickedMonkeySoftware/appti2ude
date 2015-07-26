@@ -121,4 +121,20 @@ class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals('5 + 5 = 10', $result->display);
     }
+
+    function testOutOfOrder() {
+        global $dispatch;
+        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
+        $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
+        $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
+        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
+        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
+        $dispatch->SendCommand(new PressButton('1', ['button' => '=']));
+
+        $result = new Calculator(null, '1');
+        $snapshot = \appti2ude\Snapshot::CreateFromStore($dispatch, '1');
+        $result->HydrateFromSnapshot($snapshot);
+
+        $this->assertEquals('5 + 5 + 55 = 65', $result->display);
+    }
 }
