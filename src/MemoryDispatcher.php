@@ -41,8 +41,7 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 		throw new \Exception("No command handler registered: $command->type");
 	}
 
-	function PublishEvent(IEvent $event) {
-		$eventType = $event->type;
+	private function applyToSubscribers(IEvent $event, $eventType) {
 		if (isset($this->eventSubscribers[$eventType])) {
 			$subscribers = $this->eventSubscribers[$eventType];
 			foreach ($subscribers as $callback) {
@@ -59,6 +58,15 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 				unset($aggregate);
 			}
 		}
+	}
+
+	function PublishEvent(IEvent $event) {
+		$eventType = $event->type;
+		$this->applyToSubscribers($event, $eventType);
+
+		// now we try publishing the same event in a less specific manner
+		$eventType = end(explode('\\', $eventType));
+		$this->applyToSubscribers($event, $eventType);
 	}
 
 	function AddHandlerFor($command, $callback) {
