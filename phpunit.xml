@@ -6,7 +6,7 @@
         cacheTokens="false"
         colors="false"
         convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
+        convertNoticesToExceptions="false"
         convertWarningsToExceptions="true"
         forceCoversAnnotation="false"
         mapTestClassNameToCoveredClassName="false"
