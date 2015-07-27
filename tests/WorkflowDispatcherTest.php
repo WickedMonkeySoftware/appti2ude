@@ -42,15 +42,28 @@ class OperatorPushed extends \appti2ude\Event {
     }
 }
 
+class PerformedLastOp extends \appti2ude\Event {
+    protected function PerformedLastOpInitialize() {
+        $this->AddProperty('operator', '');
+    }
+}
+
+class CompletedCalc extends \appti2ude\Event {
+
+}
+
 class Calculator extends \appti2ude\Aggregate {
     protected function CalculatorInitialize() {
-        $this->AddProperty('value', 0);
-        $this->AddProperty('display', 0);
-        $this->AddProperty('holdOp', '');
+        $this->AddProperty('value', '');
+        $this->AddProperty('display', '');
+        $this->AddProperty('register', '');
+        $this->AddProperty('lastOp', '');
         $this->AddCommandHandler('PressButton', 'PressButton');
         $this->AddEventHandler('NumberPushed', 'NumberPushed');
+        $this->AddEventHandler('CompletedCalc', 'CompletedCalc');
         $this->AddEventHandler('ClrPushed', 'ClrPushed');
         $this->AddEventHandler('OperatorPushed', 'OperatorPushed');
+        $this->AddEventHandler('PerformedLastOp', 'PerformedLastOp');
     }
 
     function PressButton($command) {
@@ -69,44 +82,57 @@ class Calculator extends \appti2ude\Aggregate {
 
     function NumberPushed($event) {
         $number = $event->value;
-        switch ($this->holdOp) {
-            case '':
-                $this->value = $number;
-                break;
-            case '+':
-                $this->value += $number;
-                break;
-            case '-':
-                $this->value -= $number;
-                break;
-            case '=':
-                $this->value = $number;
-                break;
-        }
-        //$this->display .= strlen($this->display) > 0 ? " " : "";
+
+        $this->register .= $number;
         $this->display .= $number;
-        //var_dump($this->display);
     }
 
     function ClrPushed($event) {
-        $this->holdOp = '';
-        $this->value = 0;
+        $this->register = '';
+        $this->value = '';
         $this->display = "";
+    }
+
+    function CompletedCalc($event) {
+        $this->display .= "=$this->value";
+    }
+
+    function PerformedLastOp($event) {
+        $op = $event->operator;
+        $number = $this->register;
+        $this->doOp($op, $number, false);
+        $this->ApplyOneEvent(new CompletedCalc($this->id));
+    }
+
+    private function doOp($op, $number, $doDisplay = true) {
+        switch ($op) {
+            case "=":
+                $this->ApplyOneEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp]));
+                return;
+            case "+":
+                $this->value += $number;
+                break;
+            case "-":
+                $this->value -= $number;
+                break;
+            case "/":
+                $this->value /= $number;
+                break;
+            case "*":
+                $this->value *= $number;
+                break;
+        }
+        $this->register = '';
+        if ($doDisplay)
+            $this->display .= $op;
+        $this->lastOp = $op;
     }
 
     function OperatorPushed($event) {
         $op = $event->operator;
+        $number = $this->register;
         //var_dump($op);
-        switch ($op) {
-            case "=":
-                $this->display .= "=$this->value";
-                $this->holdOp = $op;
-                break;
-            default:
-                $this->holdOp = $op;
-                $this->display .= "$op";
-                break;
-        }
+        $this->doOp($op, $number);
     }
 }
 
@@ -154,6 +180,6 @@ class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
         $snapshot = \appti2ude\Snapshot::CreateFromStore($store, '1');
         $result->HydrateFromSnapshot($snapshot);
 
-        $this->assertEquals('5+5+5=15', $result->display);
+        $this->assertEquals('5+55=60', $result->display);
     }
 }
