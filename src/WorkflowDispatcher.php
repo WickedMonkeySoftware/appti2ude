@@ -54,7 +54,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
             // search for previous event
             $lastEvent = end($this->dispatch->GetStore()->LoadEventsFor($event->id))->type; // get the last event type
             foreach ($this->dependencies[$type] as $required => $callbacks) {
-                //echo "Sending $type: $required == $lastEvent\n";
+                echo "Sending $type: $required == $lastEvent\n";
                 if (!empty($lastEvent) && $lastEvent != $required) {
                     foreach ($callbacks as $callback) {
                         if ($callback[1] === true) {
