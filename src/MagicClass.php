@@ -31,6 +31,11 @@ class MagicClass {
 	 */
 	protected $data = [];
 
+    private $actions = [];
+    private $filters = [];
+
+    const CANCEL_ACTION = "CANCEL_ACTION";
+
 	/**
 	 * @param $obj mixed the object to dump
 	 * @param bool|true $echo Echo or return?
@@ -91,6 +96,40 @@ class MagicClass {
 				$this->$initializer();
 		}
 	}
+
+	public function AddAction($name, $callback, $priority = 10) {
+        if (isset($this->actions[$name]) && isset($this->actions[$name][$priority])) {
+            $this->AddAction($name, $callback, $priority + 1);
+            return;
+        }
+        $this->actions[$name][$priority] = $callback;
+        ksort($this->actions[$name]);
+    }
+
+    public function AddFilter($name, $callback, $priority = 10) {
+        if (isset($this->filters[$name]) && isset($this->filters[$name][$priority])) {
+            $this->AddFilter($name, $callback, $priority + 1);
+            return;
+        }
+        $this->filters[$name][$priority] = $callback;
+        ksort($this->filters[$name]);
+    }
+
+    protected function DoAction($name, $params) {
+        foreach($this->actions[$name] as $priority => $callback) {
+            $cancel = call_user_func_array($callback, $params);
+            if ($cancel == MagicClass::CANCEL_ACTION) {
+                break;
+            }
+        }
+    }
+
+    protected function ApplyFilter($name, $params) {
+        foreach($this->filters[$name] as $priority => $callback) {
+            $params = call_user_func_array($callback, $params);
+        }
+        return $params;
+    }
 
 	protected function AddProperty($name, $default, $isPrivate = false, $readPrivate = false, $writePrivate = false) {
 		$access = [];

@@ -17,7 +17,7 @@ class test {
 		$x = new $test();
 
 		foreach($arm->$yielder($x) as $count) {
-			echo "$count\n";
+
 		}
 	}
 }

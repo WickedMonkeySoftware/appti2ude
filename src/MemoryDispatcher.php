@@ -13,12 +13,17 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 	protected function MemoryDispatcherInitialize() {
 		$this->AddProperty('commandHandlers', [], true);
 		$this->AddProperty('eventSubscribers', [], true);
+        $this->AddAction('ApplyEvents', [$this, 'doApply']);
 	}
 
 	function __construct(IEventStore $eventStore, $id = null, $data = []) {
 		parent::__construct($id, $data);
 		$this->eventStore = $eventStore;
 	}
+
+    public function GetStore() : IEventStore {
+        return $this->eventStore;
+    }
 
 	function SendCommand(ICommand $command) {
 		if (isset($this->commandHandlers[$command->type])) {
@@ -62,13 +67,17 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
         return false;
 	}
 
-	function PublishEvent(IEvent $event) {
-		$eventType = $event->type;
-		if (!$this->applyToSubscribers($event, $eventType)) {
+    protected function doApply($event, $eventType) {
+        if (!$this->applyToSubscribers($event, $eventType)) {
             // now we try publishing the same event in a less specific manner
             $eventType = end(explode('\\', $eventType));
             $this->applyToSubscribers($event, $eventType);
         }
+    }
+
+	function PublishEvent(IEvent $event) {
+		$eventType = $event->type;
+		$this->DoAction('ApplyEvents', [$event, $eventType]);
 	}
 
 	function AddHandlerFor($command, $callback) {

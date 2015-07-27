@@ -48,8 +48,12 @@ class PerformedLastOp extends \appti2ude\Event {
     }
 }
 
-class CompletedCalc extends \appti2ude\Event {
+class CompletedCalc extends \appti2ude\Event {}
 
+class ClrPushedError extends \appti2ude\Event {
+    protected function ClrPushedErrorInitialize() {
+        $this->AddProperty('Data', '');
+    }
 }
 
 class Calculator extends \appti2ude\Aggregate {
@@ -62,7 +66,11 @@ class Calculator extends \appti2ude\Aggregate {
         $this->AddEventHandler('NumberPushed', 'NumberPushed');
         $this->AddEventHandler('CompletedCalc', 'CompletedCalc');
         $this->AddEventHandler('ClrPushed', 'ClrPushed');
-        $this->AddEventHandler('OperatorPushed', 'OperatorPushed');
+        $this->AddEventHandler('OperatorPushed', 'OperatorPushed', [
+            'NumberPushed' => true // require a number pushed, and fail silently if it isn't met
+        ],[
+            'ClrPushed' => ['ClrPushedError' => ['Data' => 'Goes Here']] // fire a clrpushederror if this isn't right
+        ]);
         $this->AddEventHandler('PerformedLastOp', 'PerformedLastOp');
     }
 

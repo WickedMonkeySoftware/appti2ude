@@ -17,6 +17,8 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$this->AddProperty('eventsLoaded', 0);
 		$this->AddProperty('iApply', []);
 		$this->AddProperty('iHandle', []);
+        $this->AddProperty('iNeed', []);
+        $this->AddProperty('iBlacklist', []);
 		$this->AddProperty('dispatch', null);
 	}
 
@@ -25,9 +27,17 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$this->dispatch = $dispatcher;
 	}
 
-	protected function AddEventHandler($eventName, $funcName) {
+	protected function AddEventHandler($eventName, $funcName, $require = null, $blacklist = null) {
 		$applier = &$this->iApply;
 		$applier[$eventName] = $funcName;
+
+        if ($require != null) {
+            $this->iNeed[$eventName] = $require;
+        }
+
+        if ($blacklist != null) {
+            $this->iBlacklist[$eventName] = $blacklist;
+        }
 	}
 
 	protected function AddCommandHandler($command, $funcName) {

@@ -7,4 +7,5 @@ interface IDispatch {
 	public function Scan($instance);
 	public function SendCommand(ICommand $command);
 	public function PublishEvent(IEvent $event);
+	public function GetStore() : IEventStore;
 }
