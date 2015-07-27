@@ -58,11 +58,11 @@ class Calculator extends \appti2ude\Aggregate {
             yield new NumberPushed($this->id, ['value' => $command->button]);
         }
 
-        if (preg_match('/^(\\+|-|=)$/', $command->button)) {
+        else if (preg_match('/^(\\+|-|=)$/', $command->button)) {
             yield new OperatorPushed($this->id, ['operator' => $command->button]);
         }
 
-        if ($command->button == 'clr') {
+        else if ($command->button == 'clr') {
             yield new ClrPushed($this->id);
         }
     }
@@ -81,25 +81,30 @@ class Calculator extends \appti2ude\Aggregate {
                 break;
             case '=':
                 $this->value = $number;
+                break;
         }
-
-        $this->display .= " $number";
+        //$this->display .= strlen($this->display) > 0 ? " " : "";
+        $this->display .= $number;
+        //var_dump($this->display);
     }
 
     function ClrPushed($event) {
         $this->holdOp = '';
         $this->value = 0;
-        $this->display = 0;
+        $this->display = "";
     }
 
     function OperatorPushed($event) {
         $op = $event->operator;
+        //var_dump($op);
         switch ($op) {
-            case '=':
-                $this->display .= " = this->value";
-                // fallthrough intentional
+            case "=":
+                $this->display .= "=$this->value";
+                $this->holdOp = $op;
+                break;
             default:
                 $this->holdOp = $op;
+                $this->display .= "$op";
                 break;
         }
     }
@@ -110,34 +115,45 @@ $workflow->Scan($forscan);
 
 class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
     function testSimple() {
-        global $dispatch;
-        $dispatch->SendCommand(new PressButton('1', ['button' => 'clr']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '=']));
+        $store = new appti2ude\MemoryEventStore();
+        $dispatch = new appti2ude\MemoryDispatcher($store);
+        $workflow = new appti2ude\WorkflowDispatcher($dispatch);
+        $scan = new Calculator();
+        $workflow->Scan($scan);
+
+        $workflow->SendCommand(new PressButton('1', ['button' => 'clr']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '+']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '=']));
 
         $result = new Calculator(null, '1');
-        $snapshot = \appti2ude\Snapshot::CreateFromStore($dispatch, '1');
+        $snapshot = \appti2ude\Snapshot::CreateFromStore($store, '1');
         $result->HydrateFromSnapshot($snapshot);
 
-        $this->assertEquals('5 + 5 = 10', $result->display);
+        $this->assertEquals('5+5=10', $result->display);
     }
 
     function testOutOfOrder() {
-        global $dispatch;
-        $dispatch->SendCommand(new PressButton('1', ['button' => 'clr']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '+']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '5']));
-        $dispatch->SendCommand(new PressButton('1', ['button' => '=']));
+        //global $dispatch, $store;
+        $store = new appti2ude\MemoryEventStore();
+        $dispatch = new appti2ude\MemoryDispatcher($store);
+        $workflow = new appti2ude\WorkflowDispatcher($dispatch);
+        $scan = new Calculator();
+        $workflow->Scan($scan);
+
+        $workflow->SendCommand(new PressButton('1', ['button' => 'clr']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '+']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '+']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '=']));
 
         $result = new Calculator(null, '1');
-        $snapshot = \appti2ude\Snapshot::CreateFromStore($dispatch, '1');
+        $snapshot = \appti2ude\Snapshot::CreateFromStore($store, '1');
         $result->HydrateFromSnapshot($snapshot);
 
-        $this->assertEquals('5 + 5 + 5 = 15', $result->display);
+        $this->assertEquals('5+5+5=15', $result->display);
     }
 }

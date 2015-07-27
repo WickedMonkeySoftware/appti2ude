@@ -57,16 +57,18 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 				$this->eventStore->SaveEventsFor($aggregate->id, $data);
 				unset($aggregate);
 			}
+            return true;
 		}
+        return false;
 	}
 
 	function PublishEvent(IEvent $event) {
 		$eventType = $event->type;
-		$this->applyToSubscribers($event, $eventType);
-
-		// now we try publishing the same event in a less specific manner
-		$eventType = end(explode('\\', $eventType));
-		$this->applyToSubscribers($event, $eventType);
+		if (!$this->applyToSubscribers($event, $eventType)) {
+            // now we try publishing the same event in a less specific manner
+            $eventType = end(explode('\\', $eventType));
+            $this->applyToSubscribers($event, $eventType);
+        }
 	}
 
 	function AddHandlerFor($command, $callback) {
