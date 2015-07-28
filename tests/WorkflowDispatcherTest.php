@@ -70,7 +70,7 @@ class Calculator extends \appti2ude\Aggregate {
         $this->AddEventHandler('OperatorPushed', 'OperatorPushed', [ // this should be [ -1: 'eventbefore', +1: 'eventafter' ]
             -1 => ['NumberPushed' => true], // require a number pushed, and fail silently if it isn't met
             1 => [
-                'ClrPushed' => ['ClrPushedError' => ['Data' => 'Goes Here'], true],
+                'ClrPushed' => ['\ClrPushedError' => ['Data' => 'Goes Here'], true],
             ]
         ]);
         $this->AddEventHandler('PerformedLastOp', 'PerformedLastOp');

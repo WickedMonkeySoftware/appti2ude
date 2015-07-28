@@ -13,7 +13,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
 
     protected function WorkflowDispatcherInitialize() {
         $this->AddProperty('dependencies', []);
-        $this->AddProperty('register', []);
+        $this->AddProperty('watch', []);
     }
 
     function __construct(IDispatch $dispatcher, $id = null, $data = []) {
@@ -74,8 +74,51 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
         return $this->dispatch->GetStore();
     }
 
+    private function reverseArray(&$arr) {
+        for(end($arr); key($arr) != null; prev($arr)) {
+            yield current($arr);
+        }
+    }
+
     protected function doApply($event, $type) {
         if (isset($this->dependencies[$type])) {
+            $watch = $this->dependencies[$type];
+            foreach ($watch as $where => $do) {
+                if ($where > 0) {
+                    // protect the future
+
+                }
+                else {
+                    $eventsBack = -1;
+                    $events = $this->dispatch->GetStore()->LoadEventsFor($event->id);
+                    foreach ($this->reverseArray($events) as $oldEvent) {
+                        if ($eventsBack == $where) {
+                            foreach ($do as $requiredEvent => $callback) {
+                                if ($oldEvent->type != $requiredEvent) {
+                                    if ($callback[1] === true) {
+                                        var_dump($oldEvent);
+                                        return MagicClass::CANCEL_ACTION;
+                                    }
+                                    else if (is_array($callback)) {
+                                        foreach($callback as $cb => $data) {
+                                            if ($cb == true) {
+                                                return MagicClass::CANCEL_ACTION;
+                                            }
+                                            else {
+                                                $this->dispatch->PublishEvent(new $cb($data));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            $eventsBack--;
+                            continue;
+                        }
+                    }
+                }
+            }
         }
         /*if (isset($this->dependencies[$type])) {
             // search for previous event
