@@ -13,6 +13,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
 
     protected function WorkflowDispatcherInitialize() {
         $this->AddProperty('dependencies', []);
+        $this->AddProperty('register', []);
     }
 
     function __construct(IDispatch $dispatcher, $id = null, $data = []) {
@@ -29,17 +30,41 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
         $this->dispatch->AddSubscriberFor($event, $callback);
     }
 
+    private function insert(&$haystack, &$needle, $position, $insertAfter) {
+        ksort($haystack);
+        $i = key($haystack);
+        reset($haystack);
+        foreach ($haystack as $key => $value) {
+            if ($i == $position) {
+                if ($insertAfter) {
+                    $position += 1;
+                }
+                else {
+                    $position -= 1;
+                }
+                $this->insert($haystack, $needle, $position, $insertAfter);
+                return;
+            }
+            $i += 1;
+            if (($i < $position && !$insertAfter) || ($i > $position && $insertAfter)) {
+                break;
+            }
+        }
+
+        $haystack[$position] = $needle;
+    }
+
     public function Scan($instance) {
         $snap = Snapshot::TakeSnapshot($instance);
         $data = $snap->GetSnapshot();
-        foreach ($data['iNeed'] as $event => $results) {
-            foreach ($results as $requiredEvent => $callback) {
-                $this->dependencies[$event][$requiredEvent][] = [get_class($instance), $callback];
-            }
-        }
-        foreach ($data['iBlacklist'] as $event => $results) {
-            foreach ($results as $blacklistedEvent => $callback) {
-                $this->dependencies[$blacklistedEvent][$event][] = [get_class($instance), $callback];
+        foreach ($data['iNeed'] as $event => $dependency) {
+            foreach ($dependency as $order => $results) {
+                $insertAfter = $order < 0 ? false : true;
+                foreach($results as $requiredEvent => $callback) {
+                    $callback = [$requiredEvent => [get_class($instance), $callback]];
+                    $this->dependencies[$event] = $this->dependencies[$event] ?: [];
+                    $this->insert($this->dependencies[$event], $callback, $order, $insertAfter);
+                }
             }
         }
         $this->dispatch->Scan($instance);
@@ -51,6 +76,8 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
 
     protected function doApply($event, $type) {
         if (isset($this->dependencies[$type])) {
+        }
+        /*if (isset($this->dependencies[$type])) {
             // search for previous event
             $lastEvent = end($this->dispatch->GetStore()->LoadEventsFor($event->id))->type; // get the last event type
             foreach ($this->dependencies[$type] as $required => $callbacks) {
@@ -63,7 +90,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
                     }
                 }
             }
-        }
+        }*/
     }
 
     public function SendCommand(ICommand $command) {

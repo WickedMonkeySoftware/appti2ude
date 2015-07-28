@@ -18,7 +18,6 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$this->AddProperty('iApply', []);
 		$this->AddProperty('iHandle', []);
         $this->AddProperty('iNeed', []);
-        $this->AddProperty('iBlacklist', []);
 		$this->AddProperty('dispatch', null);
 	}
 
@@ -27,16 +26,12 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 		$this->dispatch = $dispatcher;
 	}
 
-	protected function AddEventHandler($eventName, $funcName, $require = null, $blacklist = null) {
+	protected function AddEventHandler($eventName, $funcName, $require = null) {
 		$applier = &$this->iApply;
 		$applier[$eventName] = $funcName;
 
         if ($require != null) {
             $this->iNeed[$eventName] = $require;
-        }
-
-        if ($blacklist != null) {
-            $this->iBlacklist[$eventName] = $blacklist;
         }
 	}
 
@@ -65,6 +60,11 @@ class Aggregate extends \appti2ude\bones\MagicClass {
 			$apply = $this->iApply[$type];
 			$this->$apply($event);
 			$this->eventsLoaded = $this->eventsLoaded + 1;
+            if ($this->eventsLoaded != $event->version) {
+                echo "loaded: $this->eventsLoaded -----> event: $event->version\n";
+                var_dump($event->version);
+                throw new \Exception("concurrency violation");
+            }
 			return true;
 		}
 

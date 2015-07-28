@@ -38,8 +38,8 @@ class AggregateTest extends \PHPUnit_Framework_TestCase {
 
 	function testApplyEvents() {
 		$t = new TestAgg(null, '123');
-		$e1 = new TestEvent('123', ['myEvent' => 'lastone']);
-		$e2 = new TestEvent('123', ['myEvent' => 'updated']);
+		$e1 = new TestEvent('123', ['myEvent' => 'lastone', 'version' => 1]);
+		$e2 = new TestEvent('123', ['myEvent' => 'updated', 'version' => 2]);
 		$es = [$e2];
 		$this->assertEmpty($t->lastEvent);
 		$v = $t->Snapshot();

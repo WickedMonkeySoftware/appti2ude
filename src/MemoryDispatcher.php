@@ -54,10 +54,11 @@ class MemoryDispatcher extends MagicClass implements IDispatch {
 				$func = $callback[1];
 
 				$data = $this->eventStore->LoadEventsFor($event->id);
+                $version = count($data);
 				$aggregate = new $type($this, $event->id);
-				$aggregate->ApplyEvents($data);
-				$aggregate->$func($event);
+                $event->version = $version + 1;
 				$data[] = $event;
+                $aggregate->ApplyEvents($data);
 
 				$this->eventStore->SaveEventsFor($aggregate->id, $data);
 				unset($aggregate);
