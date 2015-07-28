@@ -20,8 +20,7 @@
         timeoutForSmallTests="1"
         timeoutForMediumTests="10"
         timeoutForLargeTests="60"
-        verbose="false"
-        bootstrap="./bootstrap.php">
+        verbose="false">
         <testsuites>
             <testsuite name="appti2ude">
                 <directory>tests/</directory>
@@ -32,7 +31,4 @@
                         <directory suffix=".php">./src</directory>
                 </whitelist>
         </filter>
-        <logging>
-                <log type="coverage-clover" target="build/logs/clover.xml"/>
-        </logging>
 </phpunit>

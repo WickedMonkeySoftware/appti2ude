@@ -9,4 +9,4 @@ after_script:
   - vendor/bin/test-reporter
 before_script:
  - composer install
-script: phpunit
+script: phpunit --coverage-clover build/logs/clover.xml
