@@ -2,3 +2,11 @@ language: php
 sudo: false
 php:
   - 7
+addons:
+  code_climate:
+    repo_token: f4baf39b80c44363fd1bc5d0b03d3d58d224e1c4ed39acd5ab4ab3927ee8dfe0
+after_script:
+  - vendor/bin/test-reporter
+before_script:
+ - composer install
+script: phpunit
