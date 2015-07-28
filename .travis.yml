@@ -8,5 +8,6 @@ addons:
 after_script:
   - vendor/bin/test-reporter
 before_script:
- - composer install
+  - echo "extension = xdebug.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - composer install
 script: phpunit --coverage-clover build/logs/clover.xml

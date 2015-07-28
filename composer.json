@@ -3,7 +3,8 @@
     "description": "a simple cqrs library",
     "require-dev": {
         "phpunit/phpunit": "~5.0@dev",
-        "codeclimate/php-test-reporter": "dev-master"
+        "codeclimate/php-test-reporter": "dev-master",
+        "ext-xdebug": "dev-master"
     },
     "license": "MIT",
     "authors": [
