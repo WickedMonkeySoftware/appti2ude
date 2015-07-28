@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.org/WickedMonkeySoftware/appti2ude.svg)](https://travis-ci.org/WickedMonkeySoftware/appti2ude)
+[![Build Status](https://travis-ci.org/WickedMonkeySoftware/appti2ude.svg)](https://travis-ci.org/WickedMonkeySoftware/appti2ude) [![Code Climate](https://codeclimate.com/github/WickedMonkeySoftware/appti2ude/badges/gpa.svg)](https://codeclimate.com/github/WickedMonkeySoftware/appti2ude)
