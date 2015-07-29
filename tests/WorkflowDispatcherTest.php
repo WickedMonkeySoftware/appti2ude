@@ -70,7 +70,7 @@ class Calculator extends \appti2ude\Aggregate {
         $this->AddEventHandler('OperatorPushed', 'OperatorPushed', [ // this should be [ -1: 'eventbefore', +1: 'eventafter' ]
             -1 => ['NumberPushed' => true], // require a number pushed, and fail silently if it isn't met
             1 => [
-                'ClrPushed' => ['\ClrPushedError' => ['Data' => 'Goes Here'], true],
+                'ClrPushed' => ['\ClrPushed' => ['Data' => 'Goes Here']],
             ]
         ]);
         $this->AddEventHandler('PerformedLastOp', 'PerformedLastOp');
@@ -92,8 +92,12 @@ class Calculator extends \appti2ude\Aggregate {
     }
 
     function Err($event) {
-        $this->ApplyOneEvent(new ClrPushed($this->id));
-        $this->ApplyOneEvent($event->Event);
+        //$this->ApplyOneEvent(new ClrPushed($this->id));
+        //$this->ApplyOneEvent($event->Event);
+        //$this->dispatch->PublishEvent(new ClrPushed($this->id));
+        $this->register = '';
+        $this->value = '';
+        $this->display = '';
     }
 
     function NumberPushed($event) {

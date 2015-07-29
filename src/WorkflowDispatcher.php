@@ -88,7 +88,9 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
             foreach ($watch as $where => $do) {
                 if ($where > 0) {
                     // protect the future
-
+                    $this->watch[$event->id][] = [
+                        $where => [$type => $do]
+                    ];
                 }
                 else {
                     $eventsBack = -1;
@@ -106,7 +108,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
                                                 return MagicClass::CANCEL_ACTION;
                                             }
                                             else {
-                                                $this->dispatch->PublishEvent(new $cb($data));
+                                                $this->dispatch->PublishEvent(new $cb($event->id, $data));
                                             }
                                         }
                                     }
@@ -115,6 +117,45 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
                         }
                         $eventsBack--;
                     }
+                }
+            }
+        }
+        if (isset($this->watch[$event->id])) {
+            $watch = $this->watch[$event->id];
+            foreach ($watch as $where => $do) {
+                $eventsBack = 1;
+                $events = $this->dispatch->GetStore()->LoadEventsFor($event->id);
+                foreach ($this->reverseArray($events) as $oldEvent) {
+                    if ($eventsBack == $where) {
+                        foreach($do as $does) {
+                            foreach ($does as $errorType => $wantedTypes) {
+                                foreach ($wantedTypes as $wantedEvent => $callback) {
+                                    if ($oldEvent->type == $errorType && $event->type != $wantedEvent) {
+                                        if ($callback[1] === true) {
+                                            return MagicClass::CANCEL_ACTION;
+                                        }
+                                        else if (is_array($callback)) {
+                                            $origClass = $callback[0];
+                                            $eventDef = $callback[1];
+                                            if (is_array($eventDef)) {
+                                                foreach ($eventDef as $evt => $data) {
+                                                    if (is_numeric($evt) && $data === true) {
+                                                        return MagicClass::CANCEL_ACTION;
+                                                    }
+                                                    if (class_exists($evt) && is_array($data) && self::$isProcessing == false) {
+                                                        self::$isProcessing = true;
+                                                        $this->dispatch->PublishEvent(new $evt($event->id, $data));
+                                                        self::$isProcessing = false;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $eventsBack++;
                 }
             }
         }
@@ -133,6 +174,8 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
             }
         }*/
     }
+
+    static $isProcessing = false;
 
     public function SendCommand(ICommand $command) {
         $this->dispatch->SendCommand($command);
