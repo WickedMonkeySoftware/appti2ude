@@ -98,7 +98,6 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
                             foreach ($do as $requiredEvent => $callback) {
                                 if ($oldEvent->type != $requiredEvent) {
                                     if ($callback[1] === true) {
-                                        var_dump($oldEvent);
                                         return MagicClass::CANCEL_ACTION;
                                     }
                                     else if (is_array($callback)) {
