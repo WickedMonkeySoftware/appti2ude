@@ -123,9 +123,14 @@ class Calculator extends \appti2ude\Aggregate {
 
     private function doOp($op, $number, $doDisplay = true) {
         switch ($op) {
-            case "=":
-                $this->dispatch->PublishEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp]));
+            case 'aa':
+                echo "woops";
+                break;
+            case '=':
+                //$this->dispatch->PublishEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp]));
                 //$this->ApplyOneEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp, 'version' => $this->eventsLoaded + 1]));
+                $this->doOp($this->lastOp, $this->register, false);
+                $this->display .= "=$this->value";
                 return;
             case "+":
                 $this->value += $number;

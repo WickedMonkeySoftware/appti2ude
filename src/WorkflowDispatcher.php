@@ -74,8 +74,10 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
         return $this->dispatch->GetStore();
     }
 
-    private function reverseArray(&$arr) {
-        for(end($arr); key($arr) != null; prev($arr)) {
+    private function reverseArray($arr) {
+        reset($arr);
+        end($arr);
+        for(end; key($arr) != null; prev($arr)) {
             yield current($arr);
         }
     }
@@ -112,10 +114,7 @@ class WorkflowDispatcher extends MagicClass implements IDispatch {
                                 }
                             }
                         }
-                        else {
-                            $eventsBack--;
-                            continue;
-                        }
+                        $eventsBack--;
                     }
                 }
             }
