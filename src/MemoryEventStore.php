@@ -21,6 +21,13 @@ class MemoryEventStore extends MagicClass implements IEventStore {
 	public function SaveEventsFor($id, array $events) {
 		$store = &$this->store;
 
+		usort($events, function($a, $b) {
+			if ($a->version == $b->version) {
+				throw new \Exception('concurrency error in store');
+			}
+			return ($a->version < $b->version) ? -1 : 1;
+		});
+
 		//todo: a rather nieve implementation -- should do proper versioning, and doesn't support snapshots
 		if (count($store[$id]) != count($events)) {
 			$store[$id] = $events;

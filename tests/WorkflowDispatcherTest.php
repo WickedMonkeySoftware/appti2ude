@@ -53,6 +53,7 @@ class CompletedCalc extends \appti2ude\Event {}
 class ClrPushedError extends \appti2ude\Event {
     protected function ClrPushedErrorInitialize() {
         $this->AddProperty('Data', '');
+        $this->AddProperty('Event', '');
     }
 }
 
@@ -66,12 +67,14 @@ class Calculator extends \appti2ude\Aggregate {
         $this->AddEventHandler('NumberPushed', 'NumberPushed');
         $this->AddEventHandler('CompletedCalc', 'CompletedCalc');
         $this->AddEventHandler('ClrPushed', 'ClrPushed');
-        $this->AddEventHandler('OperatorPushed', 'OperatorPushed', [
-            'NumberPushed' => true // require a number pushed, and fail silently if it isn't met
-        ],[
-            'ClrPushed' => ['ClrPushedError' => ['Data' => 'Goes Here']] // fire a clrpushederror if this isn't right
+        $this->AddEventHandler('OperatorPushed', 'OperatorPushed', [ // this should be [ -1: 'eventbefore', +1: 'eventafter' ]
+            -1 => ['NumberPushed' => true], // require a number pushed, and fail silently if it isn't met
+            1 => [
+                'ClrPushed' => ['\ClrPushed' => ['Data' => 'Goes Here']],
+            ]
         ]);
         $this->AddEventHandler('PerformedLastOp', 'PerformedLastOp');
+        $this->AddEventHandler('ClrPushedError', 'Clr');
     }
 
     function PressButton($command) {
@@ -86,6 +89,15 @@ class Calculator extends \appti2ude\Aggregate {
         else if ($command->button == 'clr') {
             yield new ClrPushed($this->id);
         }
+    }
+
+    function Err($event) {
+        //$this->ApplyOneEvent(new ClrPushed($this->id));
+        //$this->ApplyOneEvent($event->Event);
+        //$this->dispatch->PublishEvent(new ClrPushed($this->id));
+        $this->register = '';
+        $this->value = '';
+        $this->display = '';
     }
 
     function NumberPushed($event) {
@@ -109,13 +121,20 @@ class Calculator extends \appti2ude\Aggregate {
         $op = $event->operator;
         $number = $this->register;
         $this->doOp($op, $number, false);
-        $this->ApplyOneEvent(new CompletedCalc($this->id));
+        $this->dispatch->PublishEvent(new CompletedCalc($this->id));
+        //$this->ApplyOneEvent(new CompletedCalc($this->id, ['version' => $this->eventsLoaded + 1]));
     }
 
     private function doOp($op, $number, $doDisplay = true) {
         switch ($op) {
-            case "=":
-                $this->ApplyOneEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp]));
+            case 'aa':
+                echo "woops";
+                break;
+            case '=':
+                //$this->dispatch->PublishEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp]));
+                //$this->ApplyOneEvent(new PerformedLastOp($this->id, ['operator' => $this->lastOp, 'version' => $this->eventsLoaded + 1]));
+                $this->doOp($this->lastOp, $this->register, false);
+                $this->display .= "=$this->value";
                 return;
             case "+":
                 $this->value += $number;
@@ -189,5 +208,28 @@ class WorkflowDispatcherTest extends PHPUnit_Framework_TestCase {
         $result->HydrateFromSnapshot($snapshot);
 
         $this->assertEquals('5+55=60', $result->display);
+    }
+
+    function testErr() {
+        $store = new appti2ude\MemoryEventStore();
+        $dispatch = new appti2ude\MemoryDispatcher($store);
+        $workflow = new appti2ude\WorkflowDispatcher($dispatch);
+        $scan = new Calculator();
+        $workflow->Scan($scan);
+
+        $workflow->SendCommand(new PressButton('1', ['button' => 'clr']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '+']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '+']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '5']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '=']));
+        $workflow->SendCommand(new PressButton('1', ['button' => '3']));
+
+        $result = new Calculator(null, '1');
+        $snapshot = \appti2ude\Snapshot::CreateFromStore($store, '1');
+        $result->HydrateFromSnapshot($snapshot);
+
+        $this->assertEquals('3', $result->display);
     }
 }

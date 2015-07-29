@@ -19,6 +19,6 @@ use appti2ude\inter\IEvent;
  */
 class Event extends MagicClass implements IEvent {
 	protected function EventInitialize() {
-		$this->AddProperty('payload', []);
+		$this->AddProperty('version', []);
 	}
 }
