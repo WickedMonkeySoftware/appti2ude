@@ -1,3 +1,3 @@
 #!/bin/bash
-php composer.phar install
+php composer.phar install --prefer-dist
 phpunit
